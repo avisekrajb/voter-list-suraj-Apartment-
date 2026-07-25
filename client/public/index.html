@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗳️</text></svg>" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1B3A5C" />
+  <meta name="description" content="मतदाता विवरण प्रणाली - Voter Management System" />
+  
+  <title>मतदाता विवरण प्रणाली | Voter Management System</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <style>
+    /* Critical CSS for initial render */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      margin: 0;
+      font-family: 'Inter', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background: #FAFBFC;
+    }
+    
+    #root {
+      min-height: 100vh;
+    }
+    
+    .loading-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Manrope', 'Noto Sans Devanagari', sans-serif;
+      color: #1B3A5C;
+      background: #FAFBFC;
+    }
+    
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #E4E9EF;
+      border-top-color: #1B3A5C;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 20px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .loading-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .loading-sub {
+      font-size: 14px;
+      color: #6B7684;
+    }
+  </style>
+</head>
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  
+  <div id="root">
+    <div class="loading-screen">
+      <div class="loading-spinner"></div>
+      <div class="loading-title">मतदाता विवरण प्रणाली</div>
+      <div class="loading-sub">लोड हुँदैछ...</div>
+    </div>
+  </div>
+  
+  <script>
+    // Remove loading screen when React mounts
+    document.addEventListener('DOMContentLoaded', function() {
+      const root = document.getElementById('root');
+      if (root) {
+        const loading = root.querySelector('.loading-screen');
+        if (loading) {
+          // Keep it visible until React replaces it
+          setTimeout(() => {
+            if (root.children.length === 1 && root.children[0].classList.contains('loading-screen')) {
+              // If React hasn't mounted yet, keep loading
+            }
+          }, 100);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

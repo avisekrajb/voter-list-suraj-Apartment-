@@ -1,0 +1,245 @@
+# ====================
+# DEPENDENCIES
+# ====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ====================
+# ENVIRONMENT VARIABLES
+# ====================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# ====================
+# BUILD OUTPUT
+# ====================
+dist/
+build/
+out/
+.next/
+.nuxt/
+.vuepress/dist/
+.storybook/out/
+.parcel-cache/
+
+# ====================
+# IDE / EDITOR FILES
+# ====================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.~lock.*
+*.sublime-*
+.project
+.classpath
+.settings/
+*.iml
+
+# ====================
+# OS GENERATED FILES
+# ====================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+*.tmp
+*.temp
+
+# ====================
+# LOGS
+# ====================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+access.log
+error.log
+
+# ====================
+# TESTING COVERAGE
+# ====================
+coverage/
+.nyc_output/
+jest-coverage/
+*.lcov
+*.lcov.info
+
+# ====================
+# DATABASE FILES
+# ====================
+*.db
+*.sqlite
+*.sqlite3
+*.mdb
+*.accdb
+*.ldb
+*.fdb
+*.mdf
+*.ldf
+
+# ====================
+# UPLOADED FILES
+# ====================
+uploads/
+uploads/*
+!uploads/.gitkeep
+public/uploads/
+public/uploads/*
+!public/uploads/.gitkeep
+tmp/
+temp/
+
+# ====================
+# MONGODB / DATABASE LOCAL
+# ====================
+data/
+mongodb-data/
+dump/
+*.bson
+*.json
+
+# ====================
+# SERVER SPECIFIC
+# ====================
+server/.env
+server/.env.*
+server/nodemon.json
+server/*.log
+server/dump/
+server/data/
+
+# ====================
+# CLIENT SPECIFIC
+# ====================
+client/.env
+client/.env.*
+client/build/
+client/dist/
+client/.DS_Store
+client/node_modules/
+client/public/
+client/*.log
+
+# ====================
+# CERTIFICATES / SSL
+# ====================
+*.pem
+*.crt
+*.key
+*.csr
+*.p12
+*.pfx
+certificates/
+ssl/
+
+# ====================
+# PACKAGE MANAGER LOCK FILES
+# ====================
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+composer.lock
+Cargo.lock
+Gemfile.lock
+
+# ====================
+# EXCEL / DATA FILES (Except sample data)
+# ====================
+*.xlsx
+*.xls
+*.csv
+*.tsv
+!sample-data/*.xlsx
+!sample-data/*.csv
+
+# ====================
+# COMPRESSED FILES
+# ====================
+*.zip
+*.rar
+*.7z
+*.tar.gz
+*.tgz
+*.gz
+*.bz2
+
+# ====================
+# BACKUP FILES
+# ====================
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*.patch
+
+# ====================
+# SECURITY FILES
+# ====================
+.secrets
+.credentials
+.secret/
+private/
+*.private.*
+
+# ====================
+# MISC
+# ====================
+.ftpconfig
+.ftppass
+.env.production
+.env.staging
+*.pid
+*.seed
+*.pid.lock
+*.semaphore
+
+# ====================
+# VERCEL / DEPLOYMENT
+# ====================
+.vercel
+.vercel_build
+.vercel_cache
+
+# ====================
+# DOCKER
+# ====================
+.dockerignore
+*.dockerignore
+.docker/
+docker-compose.override.yml
+
+# ====================
+# AWS / CLOUD
+# ====================
+.aws/
+aws/
+*.pem
+*.ppk
+
+# ====================
+# GIT
+# ====================
+*.orig
+*.rej
+.gitattributes
+.gitmodules
+.gitkeep
+!**/.gitkeep

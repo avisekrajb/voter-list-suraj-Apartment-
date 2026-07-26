@@ -27,7 +27,8 @@ function cleanVoterData(voter) {
   const cleaned = {};
   for (const [key, value] of Object.entries(voter)) {
     if (key === 'sn') {
-      cleaned[key] = convertDevanagariToNumber(value);
+      // Don't use SN from Excel - we will auto-generate it
+      cleaned[key] = undefined;
     } else if (typeof value === 'string') {
       cleaned[key] = value.trim();
     } else {
@@ -95,7 +96,7 @@ function parseExcelFile(fileBuffer, fileName) {
 
 // ==================== CONTROLLER METHODS ====================
 
-// Get all voters
+// Get all voters - Sorted by SN
 exports.getAllVoters = async (req, res) => {
   try {
     const voters = await Voter.find().sort({ sn: 1 });
@@ -106,19 +107,17 @@ exports.getAllVoters = async (req, res) => {
   }
 };
 
-// Get a single voter by SN - FIXED
+// Get a single voter by SN
 exports.getVoter = async (req, res) => {
   try {
     const { sn } = req.params;
     
-    // Validate SN parameter
     if (!sn) {
       return res.status(400).json({ error: 'SN parameter is required' });
     }
     
     const snNumber = Number(sn);
     
-    // Check if SN is a valid number
     if (isNaN(snNumber) || !isFinite(snNumber)) {
       return res.status(400).json({ 
         error: 'Invalid SN: must be a valid number',
@@ -126,7 +125,6 @@ exports.getVoter = async (req, res) => {
       });
     }
     
-    // Check if SN is a positive integer
     if (snNumber < 1 || !Number.isInteger(snNumber)) {
       return res.status(400).json({ 
         error: 'Invalid SN: must be a positive integer',
@@ -150,7 +148,7 @@ exports.getVoter = async (req, res) => {
   }
 };
 
-// Create voters (single file upload)
+// Create voters (single file upload) - FIXED Serial Number
 exports.createVoters = async (req, res) => {
   try {
     const voters = req.body;
@@ -161,12 +159,17 @@ exports.createVoters = async (req, res) => {
       });
     }
 
+    // Get the maximum SN from existing records
     const maxSN = await Voter.findOne().sort('-sn').select('sn');
     let nextSN = maxSN ? maxSN.sn + 1 : 1;
+
+    console.log(`📊 Starting SN: ${nextSN}`);
+    console.log(`📊 Total voters to process: ${voters.length}`);
 
     const validVoters = [];
     const invalidRecords = [];
 
+    // Get existing data for duplicate checking
     const existingData = await Voter.find();
     const existingVoterNos = new Set(existingData.map(v => v.voterNo));
     const existingCitizenshipNos = new Set(existingData.map(v => v.citizenshipNo));
@@ -175,10 +178,15 @@ exports.createVoters = async (req, res) => {
       const voter = voters[i];
       const issues = [];
       
+      // Clean the voter data (SN will be auto-generated)
       const cleanedVoter = cleanVoterData(voter);
+      
+      // AUTO-GENERATE SN - ALWAYS use sequential number
       cleanedVoter.sn = nextSN++;
       cleanedVoter.fileName = 'Manual Upload';
       cleanedVoter.uploadBatch = new Date().toISOString();
+      
+      console.log(`📝 Record ${i+1}: Assigned SN ${cleanedVoter.sn}`);
       
       if (!hasRequiredFields(cleanedVoter)) {
         const missingFields = [];
@@ -223,6 +231,7 @@ exports.createVoters = async (req, res) => {
       });
     }
 
+    // Save valid voters
     const savedVoters = [];
     const saveErrors = [];
 
@@ -231,6 +240,7 @@ exports.createVoters = async (req, res) => {
         const newVoter = new Voter(voter);
         await newVoter.save();
         savedVoters.push(newVoter);
+        console.log(`✅ Saved voter: ${voter.name} (SN: ${voter.sn})`);
       } catch (error) {
         console.error('Error saving voter:', error);
         saveErrors.push({
@@ -258,6 +268,7 @@ exports.createVoters = async (req, res) => {
       response.saveErrors = saveErrors;
     }
 
+    console.log(`📊 Final SN: ${nextSN}`);
     res.status(201).json(response);
 
   } catch (error) {
@@ -279,7 +290,7 @@ exports.createVoters = async (req, res) => {
   }
 };
 
-// Upload folder with multiple files - ONLY .xlsx files
+// Upload folder with multiple files - FIXED Serial Number
 exports.uploadFolder = async (req, res) => {
   try {
     const { files } = req.body;
@@ -300,15 +311,18 @@ exports.uploadFolder = async (req, res) => {
       });
     }
 
-    console.log(`Processing ${validFiles.length} .xlsx files from folder`);
+    console.log(`📁 Processing ${validFiles.length} .xlsx files from folder`);
+
+    // Get the maximum SN from existing records
+    const maxSN = await Voter.findOne().sort('-sn').select('sn');
+    let nextSN = maxSN ? maxSN.sn + 1 : 1;
+    
+    console.log(`📊 Starting SN: ${nextSN}`);
 
     const results = [];
     const allValidVoters = [];
     let totalSaved = 0;
     let totalInvalid = 0;
-
-    const maxSN = await Voter.findOne().sort('-sn').select('sn');
-    let nextSN = maxSN ? maxSN.sn + 1 : 1;
 
     const existingData = await Voter.find();
     const existingVoterNos = new Set(existingData.map(v => v.voterNo));
@@ -350,10 +364,16 @@ exports.uploadFolder = async (req, res) => {
 
       for (const voter of parsedData.data) {
         const issues = [];
+        
+        // Clean the voter data (SN will be auto-generated)
         const cleanedVoter = cleanVoterData(voter);
+        
+        // AUTO-GENERATE SN - ALWAYS use sequential number
         cleanedVoter.sn = nextSN++;
         cleanedVoter.fileName = fileName;
         cleanedVoter.uploadBatch = uploadBatchId;
+        
+        console.log(`📝 File: ${fileName}, Record: Assigned SN ${cleanedVoter.sn}`);
         
         if (!hasRequiredFields(cleanedVoter)) {
           const missingFields = [];
@@ -399,6 +419,8 @@ exports.uploadFolder = async (req, res) => {
     const saveErrors = [];
     const BATCH_SIZE = 100;
 
+    console.log(`💾 Saving ${allValidVoters.length} voters in batches...`);
+
     for (let i = 0; i < allValidVoters.length; i += BATCH_SIZE) {
       const batch = allValidVoters.slice(i, i + BATCH_SIZE);
       for (const voter of batch) {
@@ -415,6 +437,9 @@ exports.uploadFolder = async (req, res) => {
         }
       }
     }
+
+    console.log(`✅ Saved ${savedVoters.length} voters successfully`);
+    console.log(`📊 Next SN: ${nextSN}`);
 
     const response = {
       message: `${savedVoters.length} रेकर्ड सुरक्षित भयो।`,
@@ -646,12 +671,11 @@ exports.getStats = async (req, res) => {
   }
 };
 
-// Update a voter - FIXED
+// Update a voter
 exports.updateVoter = async (req, res) => {
   try {
     const { sn } = req.params;
     
-    // Validate SN parameter
     if (!sn) {
       return res.status(400).json({ error: 'SN parameter is required' });
     }
@@ -674,6 +698,7 @@ exports.updateVoter = async (req, res) => {
     delete updateData.fileName;
     delete updateData.uploadBatch;
     
+    // Clean the data but DON'T allow SN update
     updateData = cleanVoterData(updateData);
     delete updateData.sn;
     
@@ -732,12 +757,11 @@ exports.updateVoter = async (req, res) => {
   }
 };
 
-// Delete a single voter - FIXED
+// Delete a single voter
 exports.deleteVoter = async (req, res) => {
   try {
     const { sn } = req.params;
     
-    // Validate SN parameter
     if (!sn) {
       return res.status(400).json({ error: 'SN parameter is required' });
     }
@@ -770,5 +794,39 @@ exports.deleteVoter = async (req, res) => {
   } catch (error) {
     console.error('Error deleting voter:', error);
     res.status(500).json({ error: 'Failed to delete voter' });
+  }
+};
+
+// ==================== ADD THIS: Fix existing records ====================
+// One-time fix to renumber all existing records sequentially
+exports.fixSerialNumbers = async (req, res) => {
+  try {
+    // Get all voters sorted by current sn
+    const voters = await Voter.find().sort({ sn: 1 });
+    
+    if (voters.length === 0) {
+      return res.json({ message: 'No records found to fix' });
+    }
+    
+    let fixedCount = 0;
+    let newSN = 1;
+    
+    for (const voter of voters) {
+      if (voter.sn !== newSN) {
+        voter.sn = newSN;
+        await voter.save();
+        fixedCount++;
+      }
+      newSN++;
+    }
+    
+    res.json({
+      message: `Fixed ${fixedCount} records`,
+      totalRecords: voters.length,
+      fixedCount: fixedCount
+    });
+  } catch (error) {
+    console.error('Error fixing serial numbers:', error);
+    res.status(500).json({ error: 'Failed to fix serial numbers' });
   }
 };

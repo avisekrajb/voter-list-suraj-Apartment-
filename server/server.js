@@ -11,13 +11,45 @@ const PORT = process.env.PORT || 5000;
 // Connect to MongoDB Atlas
 connectDB();
 
-// Middleware
-app.use(compression()); // Compress responses
+// ===== CORS Configuration =====
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:8080',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:8080',
+  'https://partymemberslatest.onrender.com',
+  'https://voter-list-suraj-apartment-backend-1.onrender.com',
+  'https://*.onrender.com' // Allow all onrender.com subdomains
+];
 
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:8080', 'http://127.0.0.1:3000', 'http://127.0.0.1:8080'],
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin is allowed
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      // Check if it's a render.com subdomain
+      if (origin.includes('onrender.com')) {
+        callback(null, true);
+      } else {
+        console.warn('❌ CORS blocked for origin:', origin);
+        callback(new Error('Not allowed by CORS'));
+      }
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 }));
+
+// Handle preflight requests
+app.options('*', cors());
+
+// Middleware
+app.use(compression());
 
 // Increase payload size limits
 app.use(express.json({ 
@@ -40,7 +72,8 @@ app.get('/health', (req, res) => {
     message: 'Server is running',
     environment: process.env.NODE_ENV || 'development',
     database: 'MongoDB Atlas',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    allowedOrigins: allowedOrigins
   });
 });
 
@@ -70,6 +103,7 @@ app.listen(PORT, () => {
   console.log(`📁 Max upload size: 100mb`);
   console.log(`🔄 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`📦 Database: MongoDB Atlas`);
+  console.log(`🌐 CORS allowed origins:`, allowedOrigins);
 });
 
 // Handle graceful shutdown

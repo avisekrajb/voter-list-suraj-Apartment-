@@ -1,6 +1,9 @@
 import axios from 'axios';
 
+// Use environment variable or fallback
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+console.log('🔗 API URL:', API_URL);
 
 const api = axios.create({
   baseURL: API_URL,
@@ -10,44 +13,44 @@ const api = axios.create({
   timeout: 30000
 });
 
-// Request interceptor - Add token
+// Request interceptor
 api.interceptors.request.use(
   config => {
     const token = localStorage.getItem('adminToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('Token added to request:', config.url); // Debug log
-    } else {
-      console.log('No token found for request:', config.url); // Debug log
+      console.log('✅ Token added to request:', config.url);
     }
     return config;
   },
   error => {
-    console.error('Request interceptor error:', error);
+    console.error('❌ Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
 
-// Response interceptor - Handle errors
+// Response interceptor
 api.interceptors.response.use(
   response => {
-    console.log('Response received:', response.config.url, response.status); // Debug log
+    console.log('✅ Response received:', response.config.url, response.status);
     return response;
   },
   error => {
-    console.error('Response error:', error.config?.url, error.response?.status, error.message);
+    console.error('❌ Response error:', error.config?.url, error.response?.status, error.message);
     
     if (error.response) {
-      // Token expired or invalid
       if (error.response.status === 401) {
-        console.log('Token expired or invalid - logging out');
+        console.log('🔐 Token expired - logging out');
         localStorage.removeItem('adminToken');
         delete api.defaults.headers.common['Authorization'];
-        // Don't redirect here, let the component handle it
+        if (window.location.pathname !== '/') {
+          window.location.href = '/';
+        }
       }
-      
-      // Log the error response
-      console.error('Error response data:', error.response.data);
+      console.error('📝 Error response data:', error.response.data);
+    } else if (error.request) {
+      console.error('🌐 No response received from server');
+      console.error('⚠️ Check if backend is running:', API_URL);
     }
     
     return Promise.reject(error);
